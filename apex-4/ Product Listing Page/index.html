@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Listing - TechStore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        select, input[type="range"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="range"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .price-range {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .price-display {
+            font-weight: bold;
+            color: #667eea;
+            min-width: 120px;
+        }
+
+        .clear-filters {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .clear-filters:hover {
+            transform: translateY(-2px);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 3em;
+            color: #ccc;
+        }
+
+        .product-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .product-category {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .stars {
+            color: #f39c12;
+        }
+
+        .rating-text {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+        }
+
+        .no-products {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-top: 50px;
+            padding: 40px;
+        }
+
+        .results-count {
+            color: #666;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .filters-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ TechStore Products</h1>
+        
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="categoryFilter">Category:</label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Home">Home</option>
+                    <option value="Books">Books</option>
+                    <option value="Sports">Sports</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="priceRange">Price Range:</label>
+                <div class="price-range">
+                    <input type="range" id="priceRange" min="0" max="2000" value="2000">
+                    <span class="price-display" id="priceDisplay">$0 - $2000</span>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label for="sortBy">Sort By:</label>
+                <select id="sortBy">
+                    <option value="name">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="price">Price (Low to High)</option>
+                    <option value="price-desc">Price (High to Low)</option>
+                    <option value="rating">Rating (Low to High)</option>
+                    <option value="rating-desc">Rating (High to Low)</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="currencySelect">Currency:</label>
+                <select id="currencySelect">
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="JPY">JPY (¥)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="CAD">CAD (C$)</option>
+                    <option value="AUD">AUD (A$)</option>
+                    <option value="CHF">CHF (Fr)</option>
+                    <option value="CNY">CNY (¥)</option>
+                    <option value="KRW">KRW (₩)</option>
+                </select>
+            </div>
+            
+            <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
+        </div>
+        
+        <div class="results-count" id="resultsCount"></div>
+        
+        <div class="products-grid" id="productsGrid">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Sample product data (prices in USD)
+        const products = [
+            {
+                id: 1,
+                name: "Wireless Headphones",
+                category: "Electronics",
+                price: 299,
+                rating: 4.5,
+                image: "🎧"
+            },
+            {
+                id: 2,
+                name: "Smart Watch",
+                category: "Electronics",
+                price: 399,
+                rating: 4.2,
+                image: "⌚"
+            },
+            {
+                id: 3,
+                name: "Laptop Backpack",
+                category: "Electronics",
+                price: 79,
+                rating: 4.0,
+                image: "🎒"
+            },
+            {
+                id: 4,
+                name: "Cotton T-Shirt",
+                category: "Clothing",
+                price: 25,
+                rating: 4.3,
+                image: "👕"
+            },
+            {
+                id: 5,
+                name: "Denim Jeans",
+                category: "Clothing",
+                price: 89,
+                rating: 4.1,
+                image: "👖"
+            },
+            {
+                id: 6,
+                name: "Running Shoes",
+                category: "Sports",
+                price: 129,
+                rating: 4.6,
+                image: "👟"
+            },
+            {
+                id: 7,
+                name: "Coffee Maker",
+                category: "Home",
+                price: 159,
+                rating: 4.4,
+                image: "☕"
+            },
+            {
+                id: 8,
+                name: "LED Desk Lamp",
+                category: "Home",
+                price: 49,
+                rating: 4.2,
+                image: "💡"
+            },
+            {
+                id: 9,
+                name: "JavaScript Guide",
+                category: "Books",
+                price: 35,
+                rating: 4.7,
+                image: "📚"
+            },
+            {
+                id: 10,
+                name: "Yoga Mat",
+                category: "Sports",
+                price: 45,
+                rating: 4.3,
+                image: "🧘"
+            },
+            {
+                id: 11,
+                name: "Bluetooth Speaker",
+                category: "Electronics",
+                price: 199,
+                rating: 4.5,
+                image: "🔊"
+            },
+            {
+                id: 12,
+                name: "Winter Jacket",
+                category: "Clothing",
+                price: 179,
+                rating: 4.4,
+                image: "🧥"
+            }
+        ];
+
+        // Currency conversion rates (relative to USD)
+        const currencyRates = {
+            USD: 1.0,
+            EUR: 0.85,
+            GBP: 0.73,
+            JPY: 110.0,
+            INR: 74.5,
+            CAD: 1.25,
+            AUD: 1.35,
+            CHF: 0.92,
+            CNY: 6.45,
+            KRW: 1180.0
+        };
+
+        // Currency symbols
+        const currencySymbols = {
+            USD: '$',
+            EUR: '€',
+            GBP: '£',
+            JPY: '¥',
+            INR: '₹',
+            CAD: 'C$',
+            AUD: 'A$',
+            CHF: 'Fr',
+            CNY: '¥',
+            KRW: '₩'
+        };
+
+        let filteredProducts = [...products];
+        let currentCurrency = 'USD';
+
+        // Convert price from USD to target currency
+        function convertPrice(priceInUSD, targetCurrency) {
+            const convertedPrice = priceInUSD * currencyRates[targetCurrency];
+            const symbol = currencySymbols[targetCurrency];
+            
+            if (targetCurrency === 'JPY' || targetCurrency === 'KRW') {
+                return `${symbol}${Math.round(convertedPrice).toLocaleString()}`;
+            } else {
+                return `${symbol}${convertedPrice.toFixed(2)}`;
+            }
+        }
+
+        // Generate star rating display
+        function getStars(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 !== 0;
+            let stars = '★'.repeat(fullStars);
+            if (halfStar) stars += '☆';
+            return stars;
+        }
+
+        // Display products in the grid
+        function displayProducts(productsToShow) {
+            const productsGrid = document.getElementById('productsGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            resultsCount.textContent = `Showing ${productsToShow.length} of ${products.length} products`;
+            
+            if (productsToShow.length === 0) {
+                productsGrid.innerHTML = '<div class="no-products">No products found matching your criteria.</div>';
+                return;
+            }
+            
+            productsGrid.innerHTML = productsToShow.map(product => `
+                <div class="product-card">
+                    <div class="product-image">${product.image}</div>
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-category">${product.category}</div>
+                    <div class="product-price">${convertPrice(product.price, currentCurrency)}</div>
+                    <div class="product-rating">
+                        <span class="stars">${getStars(product.rating)}</span>
+                        <span class="rating-text">(${product.rating}/5)</span>
+                    </div>
+                    <button class="add-to-cart" onclick="addToCart(${product.id})">Add to Cart</button>
+                </div>
+            `).join('');
+        }
+
+        // Filter and sort products
+        function filterProducts() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const priceRange = parseInt(document.getElementById('priceRange').value);
+            const sortBy = document.getElementById('sortBy').value;
+            
+            // Convert price range back to USD for filtering
+            const maxPriceInUSD = priceRange / currencyRates[currentCurrency];
+            
+            // Filter products
+            filteredProducts = products.filter(product => {
+                const matchesCategory = !categoryFilter || product.category === categoryFilter;
+                const matchesPrice = product.price <= maxPriceInUSD;
+                return matchesCategory && matchesPrice;
+            });
+            
+            // Sort products
+            filteredProducts.sort((a, b) => {
+                switch(sortBy) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'price':
+                        return a.price - b.price;
+                    case 'price-desc':
+                        return b.price - a.price;
+                    case 'rating':
+                        return a.rating - b.rating;
+                    case 'rating-desc':
+                        return b.rating - a.rating;
+                    default:
+                        return 0;
+                }
+            });
+            
+            displayProducts(filteredProducts);
+        }
+
+        // Update price range display
+        function updatePriceDisplay() {
+            const priceRange = document.getElementById('priceRange');
+            const priceDisplay = document.getElementById('priceDisplay');
+            const currentValue = parseInt(priceRange.value);
+            const symbol = currencySymbols[currentCurrency];
+            
+            if (currentCurrency === 'JPY' || currentCurrency === 'KRW') {
+                priceDisplay.textContent = `${symbol}0 - ${symbol}${currentValue.toLocaleString()}`;
+            } else {
+                priceDisplay.textContent = `${symbol}0 - ${symbol}${currentValue.toFixed(2)}`;
+            }
+        }
+
+        // Handle currency change
+        function changeCurrency() {
+            const currencySelect = document.getElementById('currencySelect');
+            const oldCurrency = currentCurrency;
+            currentCurrency = currencySelect.value;
+            
+            // Update price range slider
+            const priceRange = document.getElementById('priceRange');
+            const currentValueInUSD = parseInt(priceRange.value) / currencyRates[oldCurrency];
+            const newValue = currentValueInUSD * currencyRates[currentCurrency];
+            const maxValue = 2000 * currencyRates[currentCurrency];
+            
+            priceRange.max = Math.round(maxValue);
+            priceRange.value = Math.round(newValue);
+            
+            updatePriceDisplay();
+            filterProducts();
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('sortBy').value = 'name';
+            document.getElementById('currencySelect').value = 'USD';
+            currentCurrency = 'USD';
+            
+            const priceRange = document.getElementById('priceRange');
+            priceRange.max = '2000';
+            priceRange.value = '2000';
+            
+            updatePriceDisplay();
+            filterProducts();
+        }
+
+        // Add product to cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const priceInCurrentCurrency = convertPrice(product.price, currentCurrency);
+            alert(`Added "${product.name}" to cart!\nPrice: ${priceInCurrentCurrency}`);
+        }
+
+        // Event listeners
+        document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+        document.getElementById('priceRange').addEventListener('input', () => {
+            updatePriceDisplay();
+            filterProducts();
+        });
+        document.getElementById('sortBy').addEventListener('change', filterProducts);
+        document.getElementById('currencySelect').addEventListener('change', changeCurrency);
+
+        // Initialize the page
+        function init() {
+            currentCurrency = 'USD';
+            document.getElementById('currencySelect').value = 'USD';
+            updatePriceDisplay();
+            displayProducts(products);
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
